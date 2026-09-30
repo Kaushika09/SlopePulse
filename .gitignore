@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.vercel/
+
+# Environment - never commit real secrets
+.env
+.env.local
+.env*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NOTE: ml/model.pkl and data/*.csv are intentionally NOT ignored.
+# They are small, reproducible artefacts and committing them means the
+# backend can boot on Render even if the build-time training step is skipped.

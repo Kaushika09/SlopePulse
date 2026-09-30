@@ -1,0 +1,24 @@
+# Render blueprint for the SlopePulse backend.
+# Deploy: Render dashboard -> New -> Blueprint -> point at this repo.
+#
+# Root directory stays at the repo root (NOT backend/) so the service can
+# import both `backend` and `ml`, and can regenerate the dataset + model
+# at build time.
+services:
+  - type: web
+    name: slopepulse-api
+    runtime: python
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+      python ml/generate_data.py
+      python data/build_district.py
+      python ml/train_model.py
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: ALLOWED_ORIGINS
+        # Replace with your real Vercel URL after the first frontend deploy.
+        value: "http://localhost:3000"

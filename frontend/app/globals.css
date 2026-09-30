@@ -1,0 +1,159 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Falls back to the system UI stack if the webfont does not load. */
+    --font-plex-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system,
+      "Segoe UI", Roboto, sans-serif;
+    --font-plex-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo,
+      Consolas, monospace;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-base text-ink antialiased;
+    /* Faint grid, like a plotted chart under the data. Very low contrast so
+       it never competes with the risk colours. */
+    background-image:
+      linear-gradient(to right, rgba(34, 49, 74, 0.28) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(34, 49, 74, 0.28) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+
+  /* Visible keyboard focus everywhere. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-ink/60 ring-offset-2 ring-offset-base;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0a101b;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #22314a;
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2e4160;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply border border-line bg-panel/80 rounded-panel backdrop-blur-sm;
+  }
+
+  /* Section label: small, wide-tracked, uppercase. Used as the only
+     structural device in the layout. */
+  .eyebrow {
+    @apply font-mono text-2xs uppercase tracking-[0.18em] text-faint;
+  }
+
+  .stat {
+    @apply font-mono tabular-nums;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Leaflet overrides                                                    */
+/* Leaflet ships light-theme chrome that clashes badly with a dark      */
+/* operations UI, so the controls and popups are restyled to match.     */
+/* ------------------------------------------------------------------ */
+
+/* Darken only the raster basemap. Overlay panes (roads, markers, tooltips)
+   are separate panes and are deliberately left untouched, so risk colours stay
+   accurate. This replaces the CARTO dark tile service with a purely local
+   effect - one fewer third-party dependency that can be blocked. */
+.leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.9)
+    saturate(0.55);
+}
+
+.leaflet-container {
+  background: #0a101b;
+  font-family: var(--font-plex-sans), system-ui, sans-serif;
+}
+
+.leaflet-control-zoom a {
+  background: #121b2a !important;
+  color: #e8eef8 !important;
+  border-color: #22314a !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: #1b2740 !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(10, 16, 27, 0.85) !important;
+  color: #5b6e8c !important;
+  font-size: 10px !important;
+}
+
+.leaflet-control-attribution a {
+  color: #8da0bc !important;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  /* !important is required here: leaflet.css ships in the dynamically imported
+     map chunk and therefore loads after this file, overriding equal-specificity
+     rules. Leaflet sets these to #fff/#333, which would render white popups on
+     the dark command-centre theme. */
+  background: #121b2a !important;
+  color: #e8eef8 !important;
+  border: 1px solid #22314a;
+  border-radius: 4px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px;
+  font-size: 12px;
+}
+
+.leaflet-popup-close-button {
+  color: #8da0bc !important;
+}
+
+/* Facility markers are drawn as divIcons rather than image markers, which
+   avoids Leaflet's default icon asset paths breaking under a bundler. */
+.slopepulse-marker {
+  background: transparent;
+  border: 0;
+}
+
+/* Slow border pulse for active critical alerts. Deliberately subtle — a
+   command screen that flashes constantly gets ignored. Disabled by the
+   reduced-motion rule below. */
+@keyframes slopepulse-alarm {
+  0%,
+  100% {
+    border-color: rgba(220, 68, 56, 0.6);
+  }
+  50% {
+    border-color: rgba(220, 68, 56, 1);
+  }
+}
+
+.slopepulse-alarm {
+  animation: slopepulse-alarm 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
